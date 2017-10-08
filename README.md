@@ -6,6 +6,8 @@ Hannah Bollar
 ## View the Project
 
 [Make sure to right click to open it in a new tab in case you need to look back here to view controls etc]
+
+
 <a href = "http://htmlpreview.github.io/?https://github.com/hanbollar/Menger-Sponge/blob/master/index.html" target="_blank">Click Here</a>
 
 ## Controls
