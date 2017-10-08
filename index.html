@@ -1,0 +1,178 @@
+<html>
+	<head>
+		<meta charset="utf-8"/>
+		<title>HBollar: Menger Sponge Implementation</title>
+		<style>
+			body { margin: 0; }
+			canvas { width: 100%; height: 100% }
+		</style>
+	</head>
+	<body>
+		<script src="js/three.js"></script>
+		<script src="js/OrbitControls.js"></script>
+		<script>
+
+			var scene;
+			var camera;
+			var renderer;
+			var positionsData;
+			var time = 0;
+			var controls;
+			var scale = 6.0;
+
+			var cubeLoc = [];
+			cubeLoc[0] = new THREE.Vector3(0, 0, 0);
+
+			var initialize = function () {
+				scene = new THREE.Scene();
+
+				var loader = new THREE.CubeTextureLoader();
+				var urlPrefix = './skymap/';
+				var skymap = new THREE.CubeTextureLoader().load([
+				  urlPrefix + 'px.jpg', urlPrefix + 'nx.jpg',
+				  urlPrefix + 'py.jpg', urlPrefix + 'ny.jpg',
+				  urlPrefix + 'pz.jpg', urlPrefix + 'nz.jpg'
+				] );
+				scene.background = skymap;
+
+				camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
+
+				var light = new THREE.AmbientLight( 0x404040 ); // soft white light
+				scene.add( light );
+
+				renderer = new THREE.WebGLRenderer();
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				document.body.appendChild( renderer.domElement );
+
+				document.body.onkeyup = function(e){
+    				if(e.keyCode == 32){
+    					 divide();
+    				}
+    			}
+
+			    controls = new THREE.OrbitControls( camera, renderer.domElement );
+			    controls.enableDamping = true;
+			    controls.enableZoom = true;
+			    controls.target.set(0, 0, 0);
+			    controls.rotateSpeed = 0.3;
+			    controls.zoomSpeed = 1.0;
+			    controls.panSpeed = 2.0;
+
+			    window.addEventListener('resize', function() {
+			      camera.aspect = window.innerWidth / window.innerHeight;
+			      camera.updateProjectionMatrix();
+			      renderer.setSize(window.innerWidth, window.innerHeight);
+			    });
+
+				var geometry = new THREE.BoxGeometry( scale, scale, scale );
+				var material = new THREE.MeshPhongMaterial( { color: rgbToHex(Math.random()*255, Math.random()*255, Math.random()*255) } );
+				var cube = new THREE.Mesh( geometry, material );
+				scene.add(cube);
+
+				// White directional light at half intensity shining from the top.
+				var directionalLight = new THREE.DirectionalLight( 0xffffff );
+				directionalLight.position.set( 1, 1, 1 ).normalize();
+				scene.add( directionalLight );
+
+				camera.position.z = 10;
+			}
+
+			var reset = function () {
+				var light = new THREE.AmbientLight( 0x404040 ); // soft white light
+				scene.add( light );
+				var directionalLight = new THREE.DirectionalLight( 0xffffff );
+				directionalLight.position.set( 1, 1, 1 ).normalize();
+				scene.add( directionalLight );
+			}
+
+			var animate = function () {
+				requestAnimationFrame( animate );
+
+				scene.rotation.z += 0.005;
+				scene.rotation.x += 0.005;
+
+				renderer.render(scene, camera);
+			};
+
+			var rgbToHex = function(R,G,B){
+				return "#" + toHex(R)+toHex(G)+toHex(B);
+			}
+
+			var toHex = function(n) {
+				 n = parseInt(n,10);
+				 if (isNaN(n)) return "00";
+				 n = Math.max(0,Math.min(n,255));
+				 return "0123456789ABCDEF".charAt((n-n%16)/16)
+				      + "0123456789ABCDEF".charAt(n%16);
+			}
+
+			var divide = function () {
+				console.log("divide");
+
+				var addingLoc = [];
+
+				
+				
+				// adding new locations based on each existing current one
+				var loc = 0;
+				for (var i = 0; i < cubeLoc.length ; i++) {
+
+					var offset = scale / 3.0;
+					var base_pos = new THREE.Vector3(cubeLoc[i].x, cubeLoc[i].y, cubeLoc[i].z);
+
+					var y_pos = base_pos.y;
+					var z_pos = base_pos.z;
+
+					// iterating through all possible new locations within this cube
+					for (var j = 0; j < 27; j++) {
+
+						if (j % 9 == 0) {
+							z_pos +=  offset;
+							y_pos = base_pos.y;
+						}
+						if (j % 3 == 0) {
+							y_pos += offset;
+						}
+
+						var x_pos = base_pos.x + (j % 3) * offset;
+
+						// skipping locations we dont want so we can create proper Menger Sponge pattern
+						if ( j == 22 || j == 16 || j == 14 || j == 13 || j == 12 || j == 10 || j == 4) { continue; }
+
+						addingLoc[loc] = new THREE.Vector3(x_pos, y_pos, z_pos);
+						loc += 1;
+					}
+				}
+
+				// reset the scene
+				scene.children = [];
+				cubeLoc = [];
+				reset();
+
+				// fill in all cubes based on locations for this round
+				for (var i = 0; i < addingLoc.length; i++) {
+
+					if (! (typeof addingLoc[i] == "undefined") ) {
+
+						var geometry = new THREE.BoxGeometry( scale/3.0, scale/3.0, scale/3.0 );
+						var material = new THREE.MeshPhongMaterial( { color: rgbToHex(Math.random()*50, Math.random()*50, Math.random()*255) } );
+		
+						var cube = new THREE.Mesh( geometry, material );
+						cube.position.set(addingLoc[i].x, addingLoc[i].y, addingLoc[i].z);
+						scene.add(cube);
+
+						cubeLoc[i] = addingLoc[i];
+					}
+				}
+
+				// update scale for next round/iteration through
+				scale = scale/3.0;
+			}
+
+			// run the program
+			initialize();
+			animate();
+
+		</script>
+	</body>
+</html>
