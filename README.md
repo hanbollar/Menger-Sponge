@@ -13,7 +13,7 @@ Hannah Bollar
 ## Controls
 
 - Use scrolling on track pad to move around the screen for zooming and rotations.
-- Use two finger hold and drag for lateral and vertical movements.
+- Use two finger press and drag for lateral and vertical movements.
 
 ### PRESS SPACE BAR TO SEE NEXT MENGER SPONGE ITERATION
 
