@@ -23,6 +23,7 @@
 			var cubeLoc = [];
 			cubeLoc[0] = new THREE.Vector3(0, 0, 0);
 
+			// set up all base information for the scene
 			var initialize = function () {
 				scene = new THREE.Scene();
 
@@ -137,6 +138,7 @@
 						var x_pos = base_pos.x + (j % 3) * offset;
 
 						// skipping locations we dont want so we can create proper Menger Sponge pattern
+						// these numbers were found following the "rational" algorithm as defined for Menger Sponge in homework 4 question 2 part b
 						if ( j == 22 || j == 16 || j == 14 || j == 13 || j == 12 || j == 10 || j == 4) { continue; }
 
 						addingLoc[loc] = new THREE.Vector3(x_pos, y_pos, z_pos);
